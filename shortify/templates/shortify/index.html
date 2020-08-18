@@ -1,4 +1,11 @@
-<p>Please enter URL to be shortened:</p>
+
+{% if short_url %}
+    <p>Your shortened URL is: {{ short_url }}</p>
+    <p>Please enter another URL to be shortened:</p>
+{% else %}
+    <p>Please enter URL to be shortened:</p>
+{% endif %}
+
 <form action="." method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
