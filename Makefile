@@ -7,3 +7,6 @@ venv:
 
 test:
 	venv/bin/python manage.py test --settings shortify.settings
+
+shell:
+	venv/bin/python manage.py shell_plus --settings shortify.settings
