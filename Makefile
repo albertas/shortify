@@ -10,3 +10,9 @@ test:
 
 shell:
 	venv/bin/python manage.py shell_plus --settings shortify.settings
+
+migrate:
+	venv/bin/python manage.py migrate --settings shortify.settings
+
+run:
+	venv/bin/python manage.py runserver --settings shortify.settings
