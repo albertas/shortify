@@ -4,3 +4,6 @@ prepare_environment: venv
 
 venv:
 	python3 -m venv venv
+
+test:
+	venv/bin/python manage.py test --settings shortify.settings
