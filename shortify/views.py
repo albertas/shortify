@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 
 from shortify.forms import URLForm
@@ -22,4 +22,4 @@ def index(request):
 
 def redirect_to_url(request, short_path):
     shortened_url = get_object_or_404(ShortenedURL, pk=short_path)
-    return HttpResponseRedirect(shortened_url.url)
+    return HttpResponsePermanentRedirect(shortened_url.url)
