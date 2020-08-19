@@ -5,8 +5,6 @@ from django.urls import reverse
 
 
 class TestULRShortening(TestCase):
-    fixtures = ["shortify/fixtures/sites.json"]
-
     def setUp(self):
         seed("test seed")
 
