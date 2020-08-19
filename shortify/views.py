@@ -21,5 +21,5 @@ def index(request):
 
 
 def redirect_to_url(request, short_path):
-    shortened_url = get_object_or_404(ShortenedURL, pk=short_path)
+    shortened_url = get_object_or_404(ShortenedURL, pk=short_path, is_active=True)
     return HttpResponsePermanentRedirect(shortened_url.url)

@@ -3,6 +3,8 @@ from random import seed
 from django.test import TestCase
 from django.urls import reverse
 
+from shortify.models import ShortenedURL
+
 
 class TestULRShortening(TestCase):
     def setUp(self):
@@ -44,3 +46,24 @@ class TestULRShortening(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn(b'class="errorlist"', resp.content)
         self.assertIn(b"Ensure this value has at most 8190 characters", resp.content)
+
+
+class TestShortenedURLDeactivation(TestCase):
+    def setUp(self):
+        seed("test seed")
+
+    def test_shortening_url(self):
+        short_url_instance = ShortenedURL.objects.create(
+            short_path="eKOs6o", url="http://example.com/"
+        )
+        short_url = short_url_instance.short_url
+
+        resp = self.client.get(short_url)
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp.url, "http://example.com/")
+
+        short_url_instance.is_active = False
+        short_url_instance.save()
+
+        resp = self.client.get(short_url)
+        self.assertEqual(resp.status_code, 404)
