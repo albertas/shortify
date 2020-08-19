@@ -18,12 +18,16 @@ class TestULRShortening(TestCase):
         resp = self.client.post(reverse("index"), data={"url": "http://example.com/"})
         self.assertEqual(resp.status_code, 200)
         self.assertIn(b"Your shortened URL is:", resp.content)
-        self.assertIn(b"http://localhost:8000/eKOs6o", resp.content)
+        self.assertIn(b"http://localhost:8000/eKOs6o/", resp.content)
 
         # Test successful redirection from shortened url
         resp = self.client.get("http://localhost:8000/eKOs6o/")
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
+
+    def test_opening_none_existing_shortened_url(self):
+        resp = self.client.get("http://localhost:8000/ABC123/")
+        self.assertEqual(resp.status_code, 404)
 
     def test_shortening_without_provided_url(self):
         resp = self.client.post(reverse("index"))

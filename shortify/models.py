@@ -9,4 +9,4 @@ class ShortenedURL(models.Model):
     url = models.URLField(max_length=8190)
 
     def short_url(self):
-        return f"http://{Site.objects.get_current().domain}/{self.short_path}"
+        return f"http://{Site.objects.get_current().domain}/{self.short_path}/"
