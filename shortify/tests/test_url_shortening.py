@@ -1,5 +1,8 @@
+from datetime import datetime
 from random import seed
+from unittest.mock import patch
 
+import pytz
 from django.test import TestCase
 from django.urls import reverse
 
@@ -47,12 +50,7 @@ class TestULRShortening(TestCase):
         self.assertIn(b'class="errorlist"', resp.content)
         self.assertIn(b"Ensure this value has at most 8190 characters", resp.content)
 
-
-class TestShortenedURLDeactivation(TestCase):
-    def setUp(self):
-        seed("test seed")
-
-    def test_shortening_url(self):
+    def test_shortened_url_deactivation(self):
         short_url_instance = ShortenedURL.objects.create(
             short_path="eKOs6o", url="http://example.com/"
         )
@@ -67,3 +65,25 @@ class TestShortenedURLDeactivation(TestCase):
 
         resp = self.client.get(short_url)
         self.assertEqual(resp.status_code, 404)
+
+    @patch("django.utils.timezone.now", return_value=datetime(2020, 1, 1, tzinfo=pytz.utc))
+    def test_click_information_logging(self, *args):
+        short_url_instance = ShortenedURL.objects.create(
+            short_path="eKOs6o", url="http://example.com/"
+        )
+        self.assertEqual(short_url_instance.click_set.count(), 0)
+
+        headers = {
+            "HTTP_REFERER": "https://secret.com/",
+            "REMOTE_ADDR": "1.1.1.1",
+        }
+
+        resp = self.client.get(short_url_instance.short_url, **headers)
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp.url, "http://example.com/")
+
+        self.assertEqual(short_url_instance.click_set.count(), 1)
+        click = short_url_instance.click_set.first()
+        self.assertEqual(click.time, datetime(2020, 1, 1, tzinfo=pytz.utc))
+        self.assertEqual(click.ip, "1.1.1.1")
+        self.assertEqual(click.http_referer, "https://secret.com/")
