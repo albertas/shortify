@@ -1,5 +1,13 @@
-# shortify
+# Shortify
 Website for URL shortening.
+
+# How to setup environment and run project locally
+* `git clone https://github.com/albertas/shortify`  # Clones this repository
+* `cd shortify`  # Goes to project directory
+* `make`  # Prepares Python virtual env and installs dependencies to it
+* `make test`  # Executes automated tests to see if everything was setup correctly
+* `make migrate`  # Creates local SQLite3 database and prepares it for usage
+* `make run`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000)
 
 # Considered decisions
 ## How to optimize database queries?
