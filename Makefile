@@ -11,6 +11,9 @@ test:
 shell:
 	venv/bin/python manage.py shell_plus --settings shortify.settings
 
+makemigrations:
+	venv/bin/python manage.py makemigrations --settings shortify.settings
+
 migrate:
 	venv/bin/python manage.py migrate --settings shortify.settings
 
