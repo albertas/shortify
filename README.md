@@ -8,7 +8,7 @@ Website for URL shortening.
 * `make`  # Prepares Python virtual env and installs dependencies to it
 * `make test`  # Executes automated tests to see if everything was setup correctly
 * `make migrate`  # Creates local SQLite3 database and prepares it for usage
-* `make run`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000)
+* `make run`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000), profiling information at [localhost:8000/silk/](http://localhost:8000/silk/)
 
 # Setup and run project without docker-compose
 * `git clone https://github.com/albertas/shortify`  # Clones this repository
@@ -16,7 +16,7 @@ Website for URL shortening.
 * `make env`  # Prepares Python virtual env and installs dependencies to it
 * `venv/bin/python manage.py test`  # Executes automated tests to see if everything was setup correctly
 * `venv/bin/python manage.py migrate`  # Creates local SQLite3 database and prepares it for usage
-* `venv/bin/python manage.py runserver`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000)
+* `venv/bin/python manage.py runserver`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000), profiling information at [localhost:8000/silk/](http://localhost:8000/silk/)
 
 # Considered decisions
 ## How to optimize database queries?
