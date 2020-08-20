@@ -1,4 +1,4 @@
-prepare_environment: venv
+env: venv
 	venv/bin/pip install -r requirements.txt
 	venv/bin/pip check
 
@@ -6,16 +6,16 @@ venv:
 	python3 -m venv venv
 
 test:
-	venv/bin/python manage.py test --settings shortify.settings $(TEST_ME_PLEASE)
+	docker-compose run web /usr/local/bin/python manage.py test $(TEST_ME_PLEASE)
 
 shell:
-	venv/bin/python manage.py shell_plus --settings shortify.settings
+	docker-compose run web /usr/local/bin/python manage.py shell_plus
 
 makemigrations:
-	venv/bin/python manage.py makemigrations --settings shortify.settings
+	docker-compose run web /usr/local/bin/python manage.py makemigrations
 
 migrate:
-	venv/bin/python manage.py migrate --settings shortify.settings
+	docker-compose run web /usr/local/bin/python manage.py migrate
 
 run:
-	venv/bin/python manage.py runserver --settings shortify.settings
+	docker-compose up
