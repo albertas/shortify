@@ -8,6 +8,7 @@ class ShortenedURL(models.Model):
     short_path = models.CharField(primary_key=True, max_length=6, default=gen_short_path)
     url = models.URLField(max_length=8190)
     is_active = models.BooleanField(default=True)
+    deactivate_at = models.DateTimeField(null=True)
 
     @property
     def short_url(self):
