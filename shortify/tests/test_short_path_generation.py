@@ -11,3 +11,6 @@ class ShortPathGenerationTestCase(TestCase):
     def test_short_path_generation(self):
         path = gen_short_path()
         self.assertEqual("eKOs6o", path)
+
+        path = gen_short_path()
+        self.assertEqual("70PiG3", path)
