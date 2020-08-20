@@ -24,8 +24,15 @@ Website for URL shortening.
 
 # Considered decisions
 ## How to optimize database queries?
-In order to increase performance `db_index=True` has to be used. However primary keys are automatically
-indexed, because they must be unique, hence `db_index=True` can be ommited for these fields.
+In order to increase performance `db_index=True` has to be used. However primary keys are
+automatically, hence `db_index=True` can be omitted for these fields.
+
+Each shortened URL click creates a separate `Click` record in the database.
+To disable shortened URL after fixed number of clicks, number of `Click` records has to be counted
+for that URL, which is time consuming operation. Counting operation can be avoided if a counter
+value is stored in the database. Updating the counter would require additional database hit during
+shortened URL redirection. However, this database hit can be moved out of URL redirection view to
+`Click.post_save` signal, this way increasing URL redirection efficiency.
 
 ## What max URL size has to be allowed?
 Max lenght of URLs submitted by users has to be restriced in order to avoid database flooding attacks.
