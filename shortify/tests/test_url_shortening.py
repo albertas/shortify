@@ -53,83 +53,75 @@ class TestULRShortening(TestCase):
         self.assertIn(b"Ensure this value has at most 8190 characters", resp.content)
 
     def test_shortened_url_deactivation(self, *args):
-        short_url_instance = ShortenedURL.objects.create(
-            short_path="KOs6o7", url="http://example.com/"
-        )
-        short_url = short_url_instance.short_url
+        shortened_url = ShortenedURL.objects.create(short_path="KOs6o7", url="http://example.com/")
+        short_url = shortened_url.short_url
 
         resp = self.client.get(short_url)
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
 
-        short_url_instance.is_active = False
-        short_url_instance.save()
+        shortened_url.is_active = False
+        shortened_url.save()
 
         resp = self.client.get(short_url)
         self.assertEqual(resp.status_code, 404)
 
     def test_click_information_logging(self, *args):
-        short_url_instance = ShortenedURL.objects.create(
-            short_path="KOs6o7", url="http://example.com/"
-        )
-        self.assertEqual(short_url_instance.click_set.count(), 0)
+        shortened_url = ShortenedURL.objects.create(short_path="KOs6o7", url="http://example.com/")
+        self.assertEqual(shortened_url.click_set.count(), 0)
 
         headers = {
             "HTTP_REFERER": "https://secret.com/",
             "REMOTE_ADDR": "1.1.1.1",
         }
 
-        resp = self.client.get(short_url_instance.short_url, **headers)
+        resp = self.client.get(shortened_url.short_url, **headers)
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
 
-        self.assertEqual(short_url_instance.click_set.count(), 1)
-        click = short_url_instance.click_set.first()
+        self.assertEqual(shortened_url.click_set.count(), 1)
+        click = shortened_url.click_set.first()
         self.assertEqual(click.time, datetime(2020, 1, 1, tzinfo=pytz.utc))
         self.assertEqual(click.ip, "1.1.1.1")
         self.assertEqual(click.http_referer, "https://secret.com/")
 
     def test_click_information_logging_when_referer_unavailable(self, *args):
-        short_url_instance = ShortenedURL.objects.create(
-            short_path="KOs6o7", url="http://example.com/"
-        )
-        self.assertEqual(short_url_instance.click_set.count(), 0)
+        shortened_url = ShortenedURL.objects.create(short_path="KOs6o7", url="http://example.com/")
+        self.assertEqual(shortened_url.click_set.count(), 0)
 
         headers = {
             "REMOTE_ADDR": "1.1.1.1",
         }
 
-        resp = self.client.get(short_url_instance.short_url, **headers)
+        resp = self.client.get(shortened_url.short_url, **headers)
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
 
-        self.assertEqual(short_url_instance.click_set.count(), 1)
-        click = short_url_instance.click_set.first()
+        self.assertEqual(shortened_url.click_set.count(), 1)
+        click = shortened_url.click_set.first()
         self.assertEqual(click.time, datetime(2020, 1, 1, tzinfo=pytz.utc))
         self.assertEqual(click.ip, "1.1.1.1")
         self.assertEqual(click.http_referer, None)
 
     def test_shortened_url_deactivate_at_option_usage(self, *args):
-        short_url_instance = ShortenedURL.objects.create(
-            short_path="KOs6o7", url="http://example.com/"
-        )
-        self.assertEqual(short_url_instance.deactivate_at, None)
+        shortened_url = ShortenedURL.objects.create(short_path="KOs6o7", url="http://example.com/")
+        self.assertEqual(shortened_url.deactivate_at, None)
 
-        resp = self.client.get(short_url_instance.short_url)
+        resp = self.client.get(shortened_url.short_url)
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
 
-        short_url_instance.deactivate_at = timezone.now() + timedelta(hours=1)
-        short_url_instance.save()
+        shortened_url.deactivate_at = timezone.now() + timedelta(hours=1)
+        shortened_url.save()
 
-        resp = self.client.get(short_url_instance.short_url)
+        resp = self.client.get(shortened_url.short_url)
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
 
-        short_url_instance.deactivate_at = timezone.now() - timedelta(hours=1)
-        short_url_instance.save()
+        shortened_url.deactivate_at = timezone.now() - timedelta(hours=1)
+        shortened_url.save()
 
-        resp = self.client.get(short_url_instance.short_url)
+        resp = self.client.get(shortened_url.short_url)
         self.assertEqual(resp.status_code, 404)
 
     def test_deactivate_shortened_url_after_max_clicks(self, *args):
