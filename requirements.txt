@@ -46,3 +46,5 @@ wcwidth==0.2.5
 ipdb==0.13.3
 
 psycopg2-binary==2.8.5
+
+django-silk==4.1.0
