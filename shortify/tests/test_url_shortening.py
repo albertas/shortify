@@ -131,3 +131,27 @@ class TestULRShortening(TestCase):
 
         resp = self.client.get(short_url_instance.short_url)
         self.assertEqual(resp.status_code, 404)
+
+    def test_deactivate_shortened_url_after_max_clicks(self, *args):
+        shortened_url = ShortenedURL.objects.create(
+            short_path="eKOs6o", url="http://example.com/", max_clicks=2,
+        )
+        self.assertEqual(shortened_url.deactivate_at, None)
+        self.assertEqual(shortened_url.number_of_clicks, 0)
+
+        resp = self.client.get(shortened_url.short_url)
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp.url, "http://example.com/")
+        shortened_url.refresh_from_db()
+        self.assertEqual(shortened_url.number_of_clicks, 1)
+
+        resp = self.client.get(shortened_url.short_url)
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp.url, "http://example.com/")
+        shortened_url.refresh_from_db()
+        self.assertEqual(shortened_url.number_of_clicks, 2)
+
+        resp = self.client.get(shortened_url.short_url)
+        self.assertEqual(resp.status_code, 404)
+        shortened_url.refresh_from_db()
+        self.assertEqual(shortened_url.number_of_clicks, 2)

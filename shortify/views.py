@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import F, Q
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -28,9 +28,11 @@ def redirect_to_url(request, short_path):
             Q(pk=short_path),
             Q(is_active=True),
             Q(deactivate_at__isnull=True) | Q(deactivate_at__gt=timezone.now()),
+            Q(max_clicks__isnull=True) | Q(number_of_clicks__lt=F("max_clicks")),
         )
     except ShortenedURL.DoesNotExist:
         raise Http404
+
     Click.objects.create(
         shortened_url=shortened_url,
         ip=request.META.get("REMOTE_ADDR"),
