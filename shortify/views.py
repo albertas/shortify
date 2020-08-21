@@ -24,18 +24,18 @@ def index(request):
 
 def redirect_to_url(request, short_path):
     try:
-        shortened_url = ShortenedURL.objects.get(
+        url = ShortenedURL.objects.filter(
             Q(pk=short_path),
             Q(is_active=True),
             Q(deactivate_at__isnull=True) | Q(deactivate_at__gt=timezone.now()),
             Q(max_clicks__isnull=True) | Q(number_of_clicks__lt=F("max_clicks")),
-        )
-    except ShortenedURL.DoesNotExist:
+        ).values_list("url", flat=True)[0]
+    except IndexError:
         raise Http404
 
     Click.objects.create(
-        shortened_url=shortened_url,
+        shortened_url_id=short_path,
         ip=request.META.get("REMOTE_ADDR"),
         http_referer=request.META.get("HTTP_REFERER"),
     )
-    return HttpResponsePermanentRedirect(shortened_url.url)
+    return HttpResponsePermanentRedirect(url)
