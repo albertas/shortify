@@ -17,8 +17,8 @@ Website for URL shortening.
 * `cd shortify`  # Goes to project directory
 * `make env`  # Prepares Python virtual env and installs dependencies to it
 * `venv/bin/python manage.py test --settings=shortify.settings.test`  # Executes automated tests to see if everything was setup correctly
-* `venv/bin/python manage.py migrate --settings=shortify.settings.dev`  # Creates local SQLite3 database and prepares it for usage
-* `venv/bin/python manage.py runserver --settings=shortify.settings.dev`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000), profiling information at [localhost:8000/silk/](http://localhost:8000/silk/)
+* `venv/bin/python manage.py migrate`  # Creates local SQLite3 database and prepares it for usage
+* `venv/bin/python manage.py runserver`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000), profiling information at [localhost:8000/silk/](http://localhost:8000/silk/)
   profiling information at [localhost:8000/silk/](http://localhost:8000/silk/) and
   admin page at [localhost:8000/silk/](http://localhost:8000/silk/)
 
