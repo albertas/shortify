@@ -2,6 +2,7 @@ from django.db.models import F, Q
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.db import connection
 
 from shortify.forms import URLForm
 from shortify.models import Click, ShortenedURL
@@ -22,7 +23,7 @@ def index(request):
     return render(request, "shortify/index.html", {"form": form})
 
 
-def redirect_to_url(request, short_path):
+def redirect_short_to_long_url(request, short_path):
     try:
         url = ShortenedURL.objects.filter(
             Q(pk=short_path),
@@ -32,6 +33,11 @@ def redirect_to_url(request, short_path):
         ).values_list("url", flat=True)[0]
     except IndexError:
         raise Http404
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"UPDATE shortify_shortenedurl "
+                       f"SET number_of_clicks = number_of_clicks + 1 "
+                       f"WHERE short_path = '{short_path}'")
 
     Click.objects.create(
         shortened_url_id=short_path,

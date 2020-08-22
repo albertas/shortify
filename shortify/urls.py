@@ -21,7 +21,7 @@ from shortify import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    re_path("^(?P<short_path>\w{6})/$", views.redirect_to_url, name="redirect_to_url"),
+    re_path("^(?P<short_path>\w{6})/$", views.redirect_short_to_long_url, name="redirect_short_to_long_url"),
     path("admin/", admin.site.urls),
 ]
 urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
