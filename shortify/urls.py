@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.conf import settings
 
 from shortify import views
 
@@ -24,3 +25,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 ]
 urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
