@@ -129,21 +129,21 @@ class TestULRShortening(TestCase):
             short_path="KOs6o7", url="http://example.com/", max_clicks=2,
         )
         self.assertEqual(shortened_url.deactivate_at, None)
-        self.assertEqual(shortened_url.number_of_clicks, 0)
+        self.assertEqual(shortened_url.click_set.count(), 0)
 
         resp = self.client.get(shortened_url.short_url)
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
         shortened_url.refresh_from_db()
-        self.assertEqual(shortened_url.number_of_clicks, 1)
+        self.assertEqual(shortened_url.click_set.count(), 1)
 
         resp = self.client.get(shortened_url.short_url)
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
         shortened_url.refresh_from_db()
-        self.assertEqual(shortened_url.number_of_clicks, 2)
+        self.assertEqual(shortened_url.click_set.count(), 2)
 
         resp = self.client.get(shortened_url.short_url)
         self.assertEqual(resp.status_code, 404)
         shortened_url.refresh_from_db()
-        self.assertEqual(shortened_url.number_of_clicks, 2)
+        self.assertEqual(shortened_url.click_set.count(), 2)

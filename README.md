@@ -197,6 +197,11 @@ removed and this `Click.post_save` signal handler is added in 2.3. version:
 28         instance.shortened_url.save()
 ```
 
+|                                        | 2.1. | 2.2. | 2.3. |
+| ---------------------------------------|--|--|--|
+| Max SQL query duration (0 clicks)      | 11.7ms | 21.1ms | 21.6ms |
+| Max SQL query duration (10000 clicks)  | 11.7ms | 21.1ms | 21.6ms |
+
 #### Conclusions
 The first conclusion of this part is that `django-silk` is not very good profiler, it omits
 creation and raw SQL queries from its summaries. Another profiling strategy was chosen: to use

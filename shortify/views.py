@@ -25,23 +25,19 @@ def index(request):
 
 def redirect_short_to_long_url(request, short_path):
     try:
-        url = ShortenedURL.objects.filter(
+        shortened_url = ShortenedURL.objects.get(
             Q(pk=short_path),
             Q(is_active=True),
             Q(deactivate_at__isnull=True) | Q(deactivate_at__gt=timezone.now()),
-            Q(max_clicks__isnull=True) | Q(number_of_clicks__lt=F("max_clicks")),
-        ).values_list("url", flat=True)[0]
-    except IndexError:
+        )
+        if shortened_url.max_clicks and shortened_url.max_clicks <= shortened_url.click_set.count():
+            raise Http404
+    except ShortenedURL.DoesNotExist:
         raise Http404
-
-    with connection.cursor() as cursor:
-        cursor.execute(f"UPDATE shortify_shortenedurl "
-                       f"SET number_of_clicks = number_of_clicks + 1 "
-                       f"WHERE short_path = '{short_path}'")
 
     Click.objects.create(
         shortened_url_id=short_path,
         ip=request.META.get("REMOTE_ADDR"),
         http_referer=request.META.get("HTTP_REFERER"),
     )
-    return HttpResponsePermanentRedirect(url)
+    return HttpResponsePermanentRedirect(shortened_url.url)
