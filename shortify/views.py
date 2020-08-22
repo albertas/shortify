@@ -1,5 +1,5 @@
 from django.db.models import F, Q
-from django.http import Http404, HttpResponsePermanentRedirect
+from django.http import Http404, HttpResponsePermanentRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.db import connection
@@ -25,14 +25,14 @@ def index(request):
 
 def redirect_short_to_long_url(request, short_path):
     try:
-        shortened_url = ShortenedURL.objects.get(
+        url, max_clicks = ShortenedURL.objects.filter(
             Q(pk=short_path),
             Q(is_active=True),
             Q(deactivate_at__isnull=True) | Q(deactivate_at__gt=timezone.now()),
-        )
-        if shortened_url.max_clicks and shortened_url.max_clicks <= shortened_url.click_set.count():
+        ).values_list('url', 'max_clicks')[0]
+        if max_clicks and max_clicks <= Click.objects.filter(shortened_url_id=short_path).count():
             raise Http404
-    except ShortenedURL.DoesNotExist:
+    except IndexError:
         raise Http404
 
     Click.objects.create(
@@ -40,4 +40,5 @@ def redirect_short_to_long_url(request, short_path):
         ip=request.META.get("REMOTE_ADDR"),
         http_referer=request.META.get("HTTP_REFERER"),
     )
-    return HttpResponsePermanentRedirect(shortened_url.url)
+    HttpResponsePermanentRedirect(url)
+    return HttpResponse('<html></html>')

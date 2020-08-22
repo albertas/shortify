@@ -216,4 +216,19 @@ but selecting Click count takes less than 1ms and its duration does not increase
 
 ### 3. Do not retrieve unused data of a shortened URL
 
+These two versions were considered:
+ - 3.1. Retrieving all ShortenedURL instance fields
+ - 3.2. Retrieving only the needed `url` and `max_clicks` fields.
+
+|                                        | 3.1. | 3.2. |
+| ---------------------------------------|--|--|
+| Max SQL query duration (0 clicks)      | 11.7ms | 11.2ms |
+
+#### Conclusions
+Retrieving only needed data from database gives a slight performance improvement 11.2ms vs 11.7ms.
+In our case the improvement is marginal (even could be deviation error), however if `ShortenedURL`
+had larger fields, like text fields, the improvement would be larger.
+
+
+### 4. Using raw SQL statements instead of ORM to form the SQL statement.
 TO BE CONTINUED ...
