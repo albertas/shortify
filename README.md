@@ -18,7 +18,7 @@ Website for URL shortening.
 * `make env`  # Prepares Python virtual env and installs dependencies to it
 * `venv/bin/python manage.py test --settings=shortify.settings.test`  # Executes automated tests to see if everything was setup correctly
 * `venv/bin/python manage.py migrate`  # Creates local SQLite3 database and prepares it for usage
-* `venv/bin/python manage.py runserver`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000), profiling information at [localhost:8000/silk/](http://localhost:8000/silk/)
+* `venv/bin/python manage.py runserver`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000), 
   profiling information at [localhost:8000/silk/](http://localhost:8000/silk/) and
   admin page at [localhost:8000/silk/](http://localhost:8000/silk/)
 
@@ -35,7 +35,7 @@ shortened URL redirection. However, this database hit can be moved out of URL re
 `Click.post_save` signal, this way increasing URL redirection efficiency.
 
 ## What max URL size has to be allowed?
-Max lenght of URLs submitted by users has to be restriced in order to avoid database flooding attacks.
+Max length of URLs submitted by users has to be restricted in order to avoid database flooding attacks.
 Hence Django URLField, which requires predefined max length can be used instead of TextField for
 storing URLs.
 
