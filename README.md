@@ -49,22 +49,22 @@ to evaluate HTTP response time and database query durations.
 
 Performance aspects which will be investigated:
 1. Usage of database indexes:
- 1. short url path is separate column with `db_index=False`.
- 2. short url path is separate column with `db_index=True`.
- 3. short url path is primary key (`db_index=True` by default).
+ - 1.1. short url path is separate column with `db_index=False`.
+ - 1.2. short url path is separate column with `db_index=True`.
+ - 1.3. short url path is primary key (`db_index=True` by default).
 2. Way to calculate the number of clicks shortened URL already has:
- 1. Calculating click objects in order to determine if max number of clicks was reached
- 2. Having a separate click counter, but its updated as a separate database call
- 3. Having a separate click counter and its value is updated using `post_save` signal of the Click log record (this database hit is out of view scope)
-3. Data retrieval of a shortened URL:
- 1. Retrieving whole shortened URL object
- 2. Retrieving only the URL
+ - 2.1. Calculating click objects in order to determine if max number of clicks was reached
+ - 2.2. Having a separate click counter, but its updated as a separate database call
+ - 2.3. Having a separate click counter and its value is updated using `post_save` signal of the Click log record (this database hit is out of view scope)
+3. Do not retrieve unused data of a shortened URL:
+ - 3.1. Retrieving whole shortened URL object
+ - 3.2. Retrieving only the URL
 4. Using raw SQL statements instead of ORM to form the SQL statement.
- 1. ORM is used to create SQL queries.
- 2. Raw SQL queries are hardcoded completely overcoming ORM usage.
+ - 4.1. ORM is used to create SQL queries.
+ - 4.2. Raw SQL queries are hardcoded completely overcoming ORM usage.
 5. Usage of synchronous VS asynchronous views (became available from Django 3.1).
- 1. Synchronous view
- 2. Asynchronous view (database queries are still made synchronously, asynchronous database will be available only from Django 4.0).
+ - 5.1. Synchronous view
+ - 5.2. Asynchronous view (database queries are still made synchronously, asynchronous database will be available only from Django 4.0).
 
 
 ### 1. Usage of database indexes
@@ -122,6 +122,7 @@ maximum SQL query duration was evaluated using `django-silk` profiler:
 | Max HTTP response time     | 85ms | 38ms | 34ms |
 | Max SQL query duration     | 36ms | 6ms | 5ms |
 
+#### Conclusion
 Conclusion can be drawn that the most efficient strategy is 1.3. - to store `ShortenedURL.short_path` as primary key.
 
 ### 2. Way to calculate the number of clicks shortened URL already has
@@ -195,3 +196,19 @@ removed and this `Click.post_save` signal handler is added in 2.3. version:
 27         instance.shortened_url.number_of_clicks += 1
 28         instance.shortened_url.save()
 ```
+
+#### Conclusions
+The first conclusion of this part is that `django-silk` is not very good profiler, it omits
+creation and raw SQL queries from its summaries. Another profiling strategy was chosen: to use
+`django-debug-toolbar` overviews, since they are more acurate and reliable.
+
+Another conclusion is based on `django-debug-toolbar`: there is no performance difference between
+2.2 and 2.3 strategies, hence there is no point to use `Click.post_save` signal.
+
+The final conclusion is that 2.1 version is superior over 2.2, since counter update operation always takes about 10ms, 
+but selecting Click count takes less than 1ms and its duration does not increase with the number of objects.
+
+
+### 3. Do not retrieve unused data of a shortened URL
+
+TO BE CONTINUED ...
