@@ -13,21 +13,29 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path, re_path
-from django.conf import settings
 
 from shortify import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    re_path("^(?P<short_path>\w{6})/$", views.redirect_short_to_long_url, name="redirect_short_to_long_url"),
+    re_path(
+        "^(?P<short_path>\w{6})/$",
+        views.redirect_short_to_long_url,
+        name="redirect_short_to_long_url",
+    ),
+    re_path(
+        "^a/(?P<short_path>\w{6})/$",
+        views.redirect_short_to_long_url_async,
+        name="redirect_short_to_long_url_async",
+    ),
     path("admin/", admin.site.urls),
 ]
 urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
 
 if settings.DEBUG:
     import debug_toolbar
-    urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns
+
+    urlpatterns = [path("__debug__/", include(debug_toolbar.urls)),] + urlpatterns

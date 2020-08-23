@@ -170,7 +170,7 @@ To updating the counter would require additional database hit during shortened U
 07             Q(pk=short_path),
 08             Q(is_active=True),
 09             Q(deactivate_at__isnull=True) | Q(deactivate_at__gt=timezone.now()),
-10             Q(max_clicks__isnull=True) | Q(number_of_clicks__lte=F("max_clicks")) 
+10             Q(max_clicks__isnull=True) | Q(number_of_clicks__lte=F("max_clicks"))
 11         ).values_list('url', 'number_of_clicks')[0]
 12     except IndexError:
 13         raise Http404
@@ -210,7 +210,7 @@ creation and raw SQL queries from its summaries. Another profiling strategy was 
 Another conclusion is based on `django-debug-toolbar`: there is no performance difference between
 2.2 and 2.3 strategies, hence there is no point to use `Click.post_save` signal.
 
-The final conclusion is that 2.1 version is superior over 2.2, since counter update operation always takes about 10ms, 
+The final conclusion is that 2.1 version is superior over 2.2, since counter update operation always takes about 10ms,
 but selecting Click count takes less than 1ms and its duration does not increase with the number of objects.
 
 
@@ -229,6 +229,11 @@ Retrieving only needed data from database gives a slight performance improvement
 In our case the improvement is marginal (even could be deviation error), however if `ShortenedURL`
 had larger fields, like text fields, the improvement would be larger.
 
-
 ### 4. Using raw SQL statements instead of ORM to form the SQL statement.
-TO BE CONTINUED ...
+Not investigated.
+
+### 5. Usage of synchronous VS asynchronous views (became available from Django 3.1).
+Without modifications whole response time is about 80ms (refreshed page 10 times).
+With async view response time is about 50ms (refreshed page 10 times).
+
+However the debuging and testing is way more complicated for async views.
