@@ -17,8 +17,8 @@ Website for URL shortening.
 * `cd shortify`  # Goes to project directory
 * `make env`  # Prepares Python virtual env and installs dependencies to it
 * `venv/bin/python manage.py test --settings=shortify.settings.test`  # Executes automated tests to see if everything was setup correctly
-* `venv/bin/python manage.py migrate`  # Creates local SQLite3 database and prepares it for usage
-* `venv/bin/python manage.py runserver`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000),
+* `venv/bin/python manage.py migrate --settings=shortify.settings.test`  # Creates local SQLite3 database and prepares it for usage
+* `venv/bin/python manage.py runserver --settings=shortify.settings.test`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000),
   profiling information at [localhost:8000/silk/](http://localhost:8000/silk/) and
   admin page at [localhost:8000/silk/](http://localhost:8000/silk/)
 
@@ -208,7 +208,7 @@ creation and raw SQL queries from its summaries. Another profiling strategy was 
 `django-debug-toolbar` overviews, since they are more acurate and reliable.
 
 Another conclusion is based on `django-debug-toolbar`: there is no performance difference between
-2.2 and 2.3 strategies, hence there is no point to use `Click.post_save` signal.
+2.2 and 2.3 strategies, hence there is no point of useing `Click.post_save` signal.
 
 The final conclusion is that 2.1 version is superior over 2.2, since counter update operation always takes about 10ms,
 but selecting Click count takes less than 1ms and its duration does not increase with the number of objects.
@@ -227,13 +227,20 @@ These two versions were considered:
 #### Conclusions
 Retrieving only needed data from database gives a slight performance improvement 11.2ms vs 11.7ms.
 In our case the improvement is marginal (even could be deviation error), however if `ShortenedURL`
-had larger fields, like text fields, the improvement would be larger.
+had larger fields, like text fields, the improvement would be greater.
 
 ### 4. Using raw SQL statements instead of ORM to form the SQL statement.
 Not investigated.
 
 ### 5. Usage of synchronous VS asynchronous views (became available from Django 3.1).
-Without modifications whole response time is about 80ms (refreshed page 10 times).
-With async view response time is about 50ms (refreshed page 10 times).
+These two versions were considered:
+ - 5.1. Synchronous view
+ - 5.2. Asynchronous view
 
-However the debuging and testing is way more complicated for async views.
+|                                        | 5.1. | 5.2. |
+| ---------------------------------------|--|--|
+| Total HTTP response time               | 80ms | 50ms |
+
+#### Conclusions
+Asynchronous view usage has way better performance, however with a code testability trade off.
+Debuging and testing of async views are more complicated.

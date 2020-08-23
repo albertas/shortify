@@ -6,12 +6,9 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('shortify', '0007_shortenedurl_user'),
+        ("shortify", "0007_shortenedurl_user"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='shortenedurl',
-            name='number_of_clicks',
-        ),
+        migrations.RemoveField(model_name="shortenedurl", name="number_of_clicks",),
     ]
