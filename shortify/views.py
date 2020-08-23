@@ -1,5 +1,5 @@
 from django.db.models import F, Q
-from django.http import Http404, HttpResponsePermanentRedirect, HttpResponse
+from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.db import connection
@@ -12,7 +12,10 @@ def index(request):
     if request.method == "POST":
         form = URLForm(request.POST)
         if form.is_valid():
-            form.save()
+            shortened_url = form.save(commit=False)
+            if request.user.is_authenticated:
+                shortened_url.user = request.user
+            shortened_url.save()
             return render(
                 request,
                 "shortify/index.html",
@@ -40,5 +43,4 @@ def redirect_short_to_long_url(request, short_path):
         ip=request.META.get("REMOTE_ADDR"),
         http_referer=request.META.get("HTTP_REFERER"),
     )
-    HttpResponsePermanentRedirect(url)
-    return HttpResponse('<html></html>')
+    return HttpResponsePermanentRedirect(url)

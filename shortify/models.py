@@ -2,6 +2,7 @@ from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth.models import User
 
 from shortify.utils import gen_short_path
 
@@ -13,6 +14,7 @@ class ShortenedURL(models.Model):
     deactivate_at = models.DateTimeField(null=True)
     number_of_clicks = models.PositiveIntegerField(default=0)
     max_clicks = models.PositiveIntegerField(null=True)
+    user = models.ForeignKey(User, null=True, on_delete=models.RESTRICT)
 
     @property
     def short_url(self):
