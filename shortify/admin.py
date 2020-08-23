@@ -31,7 +31,7 @@ class ShortenedURLAdmin(admin.ModelAdmin):
         'number_of_clicks',
         'max_clicks',
     ]
-    readonly_fields = ['get_short_url']
+    readonly_fields = ['get_short_url', 'number_of_clicks']
 
     def get_short_url(self, obj):
         return mark_safe(f'<a href="{obj.short_url}">{obj.short_url}</a>')
