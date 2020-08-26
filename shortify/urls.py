@@ -28,7 +28,6 @@ urlpatterns = [
     ),
     path("admin/", admin.site.urls),
 ]
-urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
 
 if settings.DEBUG:
     import debug_toolbar

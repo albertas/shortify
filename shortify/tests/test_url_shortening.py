@@ -27,10 +27,10 @@ class TestULRShortening(TransactionTestCase):
         resp = self.client.post(reverse("index"), data={"url": "http://example.com/"})
         self.assertEqual(resp.status_code, 200)
         self.assertIn(b"Your shortened URL is:", resp.content)
-        self.assertIn(b"http://localhost:8000/KOs6o7/", resp.content)
+        self.assertIn(b"http://localhost:8000/eKOs6o/", resp.content)
 
         # Test successful redirection from shortened url
-        resp = self.client.get("http://localhost:8000/KOs6o7/")
+        resp = self.client.get("http://localhost:8000/eKOs6o/")
         self.assertEqual(resp.status_code, 301)
         self.assertEqual(resp.url, "http://example.com/")
 
@@ -57,7 +57,7 @@ class TestULRShortening(TransactionTestCase):
         self.assertIn(b"Ensure this value has at most 8190 characters", resp.content)
 
     def test_shortened_url_deactivation(self, *args):
-        shortened_url = ShortenedURL.objects.create(short_path="KOs6o7", url="http://example.com/")
+        shortened_url = ShortenedURL.objects.create(short_path="eKOs6o", url="http://example.com/")
         short_url = shortened_url.short_url
 
         resp = self.client.get(short_url)
@@ -71,7 +71,7 @@ class TestULRShortening(TransactionTestCase):
         self.assertEqual(resp.status_code, 404)
 
     def test_click_information_logging(self, *args):
-        shortened_url = ShortenedURL.objects.create(short_path="KOs6o7", url="http://example.com/")
+        shortened_url = ShortenedURL.objects.create(short_path="eKOs6o", url="http://example.com/")
         self.assertEqual(shortened_url.click_set.count(), 0)
 
         headers = {
@@ -90,7 +90,7 @@ class TestULRShortening(TransactionTestCase):
         self.assertEqual(click.http_referer, "https://secret.com/")
 
     def test_click_information_logging_when_referer_unavailable(self, *args):
-        shortened_url = ShortenedURL.objects.create(short_path="KOs6o7", url="http://example.com/")
+        shortened_url = ShortenedURL.objects.create(short_path="eKOs6o", url="http://example.com/")
         self.assertEqual(shortened_url.click_set.count(), 0)
 
         headers = {
@@ -108,7 +108,7 @@ class TestULRShortening(TransactionTestCase):
         self.assertEqual(click.http_referer, None)
 
     def test_shortened_url_deactivate_at_option_usage(self, *args):
-        shortened_url = ShortenedURL.objects.create(short_path="KOs6o7", url="http://example.com/")
+        shortened_url = ShortenedURL.objects.create(short_path="eKOs6o", url="http://example.com/")
         self.assertEqual(shortened_url.deactivate_at, None)
 
         resp = self.client.get(shortened_url.short_url)
@@ -130,7 +130,7 @@ class TestULRShortening(TransactionTestCase):
 
     def test_deactivate_shortened_url_after_max_clicks(self, *args):
         shortened_url = ShortenedURL.objects.create(
-            short_path="KOs6o7", url="http://example.com/", max_clicks=2,
+            short_path="eKOs6o", url="http://example.com/", max_clicks=2,
         )
         self.assertEqual(shortened_url.deactivate_at, None)
         self.assertEqual(shortened_url.click_set.count(), 0)

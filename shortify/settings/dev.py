@@ -41,12 +41,10 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django_extensions",
     "debug_toolbar",
-    "silk",
     "shortify",
 ]
 
 MIDDLEWARE = [
-    "silk.middleware.SilkyMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -125,13 +123,22 @@ STATIC_URL = "/static/"
 
 SITE_ID = 1
 
-SILKY_PYTHON_PROFILER = True
-
 INTERNAL_IPS = [
     # ...
-    '127.0.0.1',
-    'localhost',
+    "127.0.0.1",
+    "localhost",
     # ...
 ]
 
-DEBUG_TOOLBAR_CONFIG = {'INSERT_BEFORE':'</html>'}
+
+def show_toolbar(request):
+    return True
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    "INSERT_BEFORE": "</html>",
+    "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+    "INTERCEPT_REDIRECTS": True,
+}
+
+DISABLE_PANELS = {}
