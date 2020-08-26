@@ -1,3 +1,5 @@
+from asyncio import create_task
+
 from asgiref.sync import sync_to_async
 from django.db import connection
 from django.db.models import F, Q
@@ -27,39 +29,14 @@ def index(request):
     return render(request, "shortify/index.html", {"form": form})
 
 
-def redirect_short_to_long_url(request, short_path):
-    try:
-        url, max_clicks = ShortenedURL.objects.filter(
-            Q(pk=short_path),
-            Q(is_active=True),
-            Q(deactivate_at__isnull=True) | Q(deactivate_at__gt=timezone.now()),
-        ).values_list("url", "max_clicks")[0]
-        if max_clicks and max_clicks <= Click.objects.filter(shortened_url_id=short_path).count():
-            raise Http404
-    except IndexError:
-        raise Http404
-
-    Click.objects.create(
-        shortened_url_id=short_path,
-        ip=request.META.get("REMOTE_ADDR"),
-        http_referer=request.META.get("HTTP_REFERER"),
-    )
-    return HttpResponsePermanentRedirect(url)
-
-
 @sync_to_async
 def get_url_max_clicks(short_path):
-    url, max_clicks = ShortenedURL.objects.filter(
+    url, max_clicks, number_of_clicks = ShortenedURL.objects.filter(
         Q(pk=short_path),
         Q(is_active=True),
         Q(deactivate_at__isnull=True) | Q(deactivate_at__gt=timezone.now()),
-    ).values_list("url", "max_clicks")[0]
-    return url, max_clicks
-
-
-@sync_to_async
-def get_clicks(short_path):
-    return Click.objects.filter(shortened_url_id=short_path).count()
+    ).values_list("url", "max_clicks", "number_of_clicks")[0]
+    return url, max_clicks, number_of_clicks
 
 
 @sync_to_async
@@ -67,18 +44,20 @@ def save_click(short_path, ip, http_referer):
     Click.objects.create(
         shortened_url_id=short_path, ip=ip, http_referer=http_referer,
     )
+    ShortenedURL.objects.filter(short_path=short_path).update(
+        number_of_clicks=F("number_of_clicks") + 1
+    )
 
 
-async def redirect_short_to_long_url_async(request, short_path):
+async def redirect_short_to_long_url(request, short_path):
     try:
-        url, max_clicks = await get_url_max_clicks(short_path)
-        if max_clicks and max_clicks <= await get_clicks(short_path):
+        url, max_clicks, number_of_clicks = await get_url_max_clicks(short_path)
+        if max_clicks and max_clicks <= number_of_clicks:
             raise Http404
     except IndexError:
         raise Http404
 
-    # TODO: should be possible not to await for completion of `save_click()` function,
-    # however for some reason Click instance does not get created if await is omitted.
-    # Should investigate further. Not awaiting would improve load time from 50ms to 30ms.
-    await save_click(short_path, request.META.get("REMOTE_ADDR"), request.META.get("HTTP_REFERER"))
+    await create_task(
+        save_click(short_path, request.META.get("REMOTE_ADDR"), request.META.get("HTTP_REFERER"),)
+    )
     return HttpResponsePermanentRedirect(url)

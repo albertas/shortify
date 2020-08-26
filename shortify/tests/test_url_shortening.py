@@ -3,10 +3,9 @@ from datetime import datetime, timedelta
 from random import seed
 from unittest.mock import patch
 
-import pytest
 import pytz
 from asgiref.sync import async_to_sync, sync_to_async
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -14,7 +13,9 @@ from shortify.models import Click, ShortenedURL
 
 
 @patch("django.utils.timezone.now", return_value=datetime(2020, 1, 1, tzinfo=pytz.utc))
-class TestULRShortening(TestCase):
+class TestULRShortening(TransactionTestCase):
+    fixtures = ["shortify/fixtures/sites.json"]
+
     def setUp(self):
         seed("test seed")
 

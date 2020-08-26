@@ -26,11 +26,6 @@ urlpatterns = [
         views.redirect_short_to_long_url,
         name="redirect_short_to_long_url",
     ),
-    re_path(
-        "^a/(?P<short_path>\w{6})/$",
-        views.redirect_short_to_long_url_async,
-        name="redirect_short_to_long_url_async",
-    ),
     path("admin/", admin.site.urls),
 ]
 urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]

@@ -14,14 +14,11 @@ class ShortenedURL(models.Model):
     deactivate_at = models.DateTimeField(null=True, blank=True)
     max_clicks = models.PositiveIntegerField(null=True, blank=True)
     user = models.ForeignKey(User, null=True, on_delete=models.RESTRICT)
+    number_of_clicks = models.PositiveIntegerField(default=0)
 
     @property
     def short_url(self):
         return f"http://{Site.objects.get_current().domain}/{self.short_path}/"
-
-    @property
-    def number_of_clicks(self):
-        return self.click_set.count()
 
 
 class Click(models.Model):
