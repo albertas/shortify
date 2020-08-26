@@ -5,22 +5,22 @@ Website for URL shortening.
 * Install `docker-ce` and `docker-compose` (check if its setup correctly by running `docker run hello-world`)
 * `git clone https://github.com/albertas/shortify`  # Clones this repository
 * `cd shortify`  # Goes to project directory
-* `make`  # Prepares Python virtual env and installs dependencies to it
+* `make`  # Builds docker images, prepares and starts containers. Then connects to django
+  container. Following commands should be executed inside django container.
 * `make test`  # Executes automated tests to see if everything was setup correctly
-* `make migrate`  # Creates local SQLite3 database and prepares it for usage
-* `make run`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000),
-  profiling information at [localhost:8000/silk/](http://localhost:8000/silk/) and
-  admin page at [localhost:8000/silk/](http://localhost:8000/silk/)
+* `make migrate`  # Creates SQL schemas in the local PosgresSQL database
+* `make run`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000) and
+  admin page at [localhost:8000/admin/](http://localhost:8000/admin/)
 
 # Setup and run project without docker
 * `git clone https://github.com/albertas/shortify`  # Clones this repository
 * `cd shortify`  # Goes to project directory
-* `make env`  # Prepares Python virtual env and installs dependencies to it
+* `python3 -m venv venv`  # Prepares Python virtual env
+* `venv/bin/pip install -r requirements.txt`  # installs dependencies to it
 * `venv/bin/python manage.py test --settings=shortify.settings.test`  # Executes automated tests to see if everything was setup correctly
 * `venv/bin/python manage.py migrate --settings=shortify.settings.test`  # Creates local SQLite3 database and prepares it for usage
 * `venv/bin/python manage.py runserver --settings=shortify.settings.test`  # Starts local development server which can be accessed at [localhost:8000](http://localhost:8000),
-  profiling information at [localhost:8000/silk/](http://localhost:8000/silk/) and
-  admin page at [localhost:8000/silk/](http://localhost:8000/silk/)
+   and admin page at [localhost:8000/admin/](http://localhost:8000/admin/)
 
 # Considered decisions
 ## What max URL length has to be allowed?
@@ -62,9 +62,11 @@ Performance aspects which will be investigated:
 4. Using raw SQL statements instead of ORM to form the SQL statement.
  - 4.1. ORM is used to create SQL queries.
  - 4.2. Raw SQL queries are hardcoded completely overcoming ORM usage.
-5. Usage of synchronous VS asynchronous views (became available from Django 3.1).
+5. Usage of synchronous VS asynchronous views (became available from Django 3.1). Database queries
+   are still made synchronously, asynchronous database will be available only from Django 4.0.
  - 5.1. Synchronous view
- - 5.2. Asynchronous view (database queries are still made synchronously, asynchronous database will be available only from Django 4.0).
+ - 5.2. Asynchronous view when Click objects creation is awaited
+ - 5.3. Asynchronous view when Click objects creation is executed as separate async task
 
 
 ### 1. Usage of database indexes
@@ -211,8 +213,11 @@ Another conclusion is based on `django-debug-toolbar`: there is no performance d
 2.2 and 2.3 strategies, hence there is no point of useing `Click.post_save` signal.
 
 The final conclusion is that 2.1 version is superior over 2.2, since counter update operation always takes about 10ms,
-but selecting Click count takes less than 1ms and its duration does not increase with the number of objects.
-
+but selecting Click count takes less than 1ms when database size is relatively small (<100000 records).
+However `Count()` operation tends to take longer when database size grows, because it has to do
+full table scan each time: https://www.postgresqltutorial.com/postgresql-count-function/ It would
+be way better to have click counter and update it outside of `redirect_short_to_long()` view. This
+should be possible with async views.
 
 ### 3. Do not retrieve unused data of a shortened URL
 
@@ -235,11 +240,12 @@ Not investigated.
 ### 5. Usage of synchronous VS asynchronous views (became available from Django 3.1).
 These two versions were considered:
  - 5.1. Synchronous view
- - 5.2. Asynchronous view
+ - 5.2. Asynchronous view when `Click` object's creation is awaited
+ - 5.3. Asynchronous view when `Click` object's creation is executed as separate async task
 
-|                                        | 5.1. | 5.2. |
-| ---------------------------------------|--|--|
-| Total HTTP response time               | 80ms | 50ms |
+|                                        | 5.1. | 5.2. | 5.3 |
+| ---------------------------------------|--|--|--|
+| Total HTTP response time               | 80ms | 50ms | 30ms |
 
 #### Conclusions
 Asynchronous view usage has way better performance, however with a code testability trade off.

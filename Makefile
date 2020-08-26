@@ -1,21 +1,18 @@
-env: venv
-	venv/bin/pip install -r requirements.txt
-	venv/bin/pip check
-
-venv:
-	python3 -m venv venv
+env:
+	docker-compose up -d --build
+	docker exec -it shortify_web_1 bash
 
 test:
-	docker-compose run web /usr/local/bin/python manage.py test $(TEST_ME_PLEASE) --settings=shortify.settings.test
+	./manage.py test $(TEST_ME_PLEASE) --settings=shortify.settings.test
 
 shell:
-	docker-compose run web /usr/local/bin/python manage.py shell_plus
-
-makemigrations:
-	docker-compose run web /usr/local/bin/python manage.py makemigrations
-
-migrate:
-	docker-compose run web /usr/local/bin/python manage.py migrate
+	./manage.py shell_plus
 
 run:
-	docker-compose up
+	./manage.py runserver 0:8000
+
+makemigrations:
+	./manage.py makemigrations
+
+migrate:
+	./manage.py migrate
